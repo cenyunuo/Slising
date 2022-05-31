@@ -1,9 +1,7 @@
 Slicing (Forked from PyConcorde)
 ==========
 
-[![Build Status](https://travis-ci.org/jvkersch/pyconcorde.svg?branch=master)](https://travis-ci.org/jvkersch/pyconcorde)
-
-What is it?
+Description
 -----
 
 Slicing is to analyze the scalability of the sliding windows annealing in **"An 80-spin Ising computer based on superparamagnetic tunnel junctions"**.
@@ -17,13 +15,25 @@ Then we applied the sliding windows annealing to refined the sub-optimal solutio
 The best-knwon solutions were obtianed using [Concorde](http://www.math.uwaterloo.ca/tsp/concorde.html). For the implementation details, please see below [PyConcorde](https://github.com/jvkersch/pyconcorde).
 
 Environment
------
+------
 
 [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/), [Ubuntu 20.04 LTS](https://www.microsoft.com/store/productId/9MTTCL66CPXJ)
 
+For installtion, please see the below **How do I install it?**. 
+
 You may encounter some installation issue, please see [this link](https://github.com/jvkersch/pyconcorde/issues/43).
 
+Evaluation
+------
+
+Simply run 
+
+	python3 test.py
+	
 Below are the original README of PyConcorde
+==========
+
+What is it?
 -----
 
 PyConcorde is a Python wrapper around the [Concorde TSP
