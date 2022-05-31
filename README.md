@@ -6,7 +6,7 @@ Description
 
 Slicing is to analyze the scalability of the sliding windows annealing in **"An 80-spin Ising computer based on superparamagnetic tunnel junctions"**.
 
-Beyond the experiment demonstration on [ST70](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/st70.tsp), we further evaluate on larger TSP problems, i.e., [RD100](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/rd100.tsp), [LIN318](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/lin318.tsp), [GR666](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/gr666.tsp), [PR1002](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/pr1002.tsp).
+Beyond the experiment demonstration on [st70](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/st70.tsp), we further evaluate on larger TSP problems, i.e., [rd100](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/rd100.tsp), [lin318](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/lin318.tsp), [d657](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/d657.tsp), [pr1002](http://elib.zib.de/pub/mp-testdata/tsp/tsplib/tsp/pr1002.tsp).
 
 We first used nearest neighbour heuristic to generate sub-optimal solution (which should be quite intuitive, start from the first city, then keep track the nearest city). Typically, they obtain a tour length of >1.23 of the best-knwon solutions.
 
@@ -19,9 +19,11 @@ Environment
 
 [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/), [Ubuntu 20.04 LTS](https://www.microsoft.com/store/productId/9MTTCL66CPXJ)
 
-For installtion, please see the below **How do I install it?**. 
+For installtion, please see the below **How do I install it?** section from the original README. 
 
 You may encounter some installation issue, please see [this link](https://github.com/jvkersch/pyconcorde/issues/43).
+	
+	pip install -e . --no-build-isolation --no-binary :all:
 
 Evaluation
 ------
@@ -30,7 +32,7 @@ Simply run
 
 	python3 test.py
 	
-Below are the original README of PyConcorde
+Below are the original README
 ==========
 
 What is it?
