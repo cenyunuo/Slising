@@ -2,9 +2,6 @@
 from __future__ import division, print_function
 
 from collections import namedtuple
-import os
-import shutil
-import tempfile
 import uuid
 
 from concorde._concorde import _CCutil_gettsplib, _CCtsp_solve_dat
@@ -20,6 +17,7 @@ class TSPSolver(object):
     def __init__(self):
         self._data = None
         self._ncount = -1
+        self.part_sol = [0]
 
     @classmethod
     def from_tspfile(cls, fname):
@@ -31,41 +29,28 @@ class TSPSolver(object):
         self._data = data
         return self
 
-    @classmethod
-    def from_data(cls, xs, ys, norm, name=None):
-        """ Construct datagroup from given data.
+    def nearest(self):
+        current = self.part_sol[-1]
+        x = self._data.x[current]
+        y = self._data.y[current]
+        tbd = list(set(range(len(self._data.x))) - set(self.part_sol))
+        next = tbd[0]
+        x_ = self._data.x[next]
+        y_ = self._data.y[next]
+        d = (x-x_)**2 + (y-y_)**2
+        for i in tbd:
+            x_ = self._data.x[i]
+            y_ = self._data.y[i]
+            d_ = (x-x_)**2 + (y-y_)**2
+            if d_ <= d:
+                d = d_
+                next = i
+        self.part_sol.append(next)
 
-        This routine writes the given data to a temporary file, and then uses
-        Concorde's file parser to read from file and do the initialization.
-        """
-        if norm not in EDGE_WEIGHT_TYPES:
-            raise ValueError("norm must be one of {} but got {!r}".format(
-                             ', '.join(EDGE_WEIGHT_TYPES), norm))
-
-        # TODO: properly figure out Concorde's CCdatagroup format and
-        # initialize this object directly instead of going via file.
-        if name is None:
-            name = uuid.uuid4().hex
-        try:
-            ccdir = tempfile.mkdtemp()
-            ccfile = os.path.join(ccdir, 'data.tsp')
-            with open(ccfile, 'w') as fp:
-                write_tsp_file(fp, xs, ys, norm, name)
-            return cls.from_tspfile(ccfile)
-        finally:
-            shutil.rmtree(ccdir)
-
-    @property
-    def x(self):
-        return self._data.x
-
-    @property
-    def y(self):
-        return self._data.y
-
-    @property
-    def z(self):
-        return self._data.z
+    def neighbour(self):
+        while len(self.part_sol) < len(self._data.x):
+            self.nearest()
+        return self.part_sol
 
     def __str__(self):
         if self._data is None:
@@ -73,10 +58,10 @@ class TSPSolver(object):
         else:
             return "TSPSolver with {} nodes".format(self._ncount)
 
-    def solve(self, time_bound=-1, verbose=True, random_seed=0):
+    def concorde(self, time_bound=-1, verbose=False, random_seed=0):
         name = str(uuid.uuid4().hex)[0:9]
         res = _CCtsp_solve_dat(
             self._ncount, self._data, name,
-            time_bound, not verbose, random_seed
+            time_bound, verbose, random_seed
         )
         return ComputedTour(*res)
