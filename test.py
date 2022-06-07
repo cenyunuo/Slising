@@ -43,24 +43,28 @@ def eva_tour(solver, tour):
 
 if __name__ == "__main__":
     # for dataset in ["rd100", "lin318", "d657", "pr1002"]
-    fname = get_dataset_path("rd100")
+    fname = get_dataset_path("pr1002")
     solver = TSPSolver.from_tspfile(fname)
+    sol_bk = solver.concorde().tour
     sol_init = solver.neighbour()
     loss = eva_tour(solver, sol_init)
     points = solver.selecting()
     Flag = True
-    while Flag:
-        if len(solver.longest_lines())>1:
-            new_tour = solver.ins_2()
-            vis_tour(solver, new_tour[0])
-            vis_tour(solver, new_tour[1])
-        elif len(solver.longest_lines()[-1])>1:
-            new_tour = solver.ins_1()
-            vis_tour(solver, new_tour)
-        vis_windows(solver, sol_init, loss)
-        Flag = solver.sliding()
-        print(new_tour)
-        plt.show()
-    #sol_bk = solver.concorde().tour
+    for i in range(10):
+        print('start {} annealing'.format(i+1))
+        while Flag:
+            if len(solver.longest_lines())>1:
+                new_tour = solver.ins_2()
+                vis_tour(solver, new_tour[0])
+                vis_tour(solver, new_tour[1])
+            if len(solver.longest_lines()[-1])>1:
+                new_tour = solver.ins_1()
+                vis_tour(solver, new_tour)
+            vis_windows(solver, solver.part_sol, loss)
+            Flag = solver.sliding()
+            plt.show()
+        print(eva_tour(solver, solver.part_sol)/eva_tour(solver, sol_bk))
+    #print(loss/eva_tour(solver, sol_bk))
+    #print(eva_tour(solver, solver.part_sol)/eva_tour(solver, sol_bk))
     os.system('rm -rf *.res')
     os.system('rm -rf *.sol')
