@@ -1,8 +1,11 @@
 from __future__ import division, print_function
 from collections import namedtuple
 from concorde._concorde import _CCutil_gettsplib, _CCtsp_solve_dat
+from copy import deepcopy
+from scipy.special import expit
 import numpy as np
 import uuid
+import math
 
 ComputedTour = namedtuple('ComputedTour', ['tour', 'optimal_value', 'success', 'found_tour', 'hit_timebound'])
 
@@ -14,7 +17,7 @@ class TSPSolver(object):
         self.part_sol = [0]
         self.box_length = 0.4
         self.box_step = 0.1
-        self.box_x = 0.1
+        self.box_x = 0.0
         self.box_y = 0
         self.limit = 1
 
@@ -49,6 +52,17 @@ class TSPSolver(object):
                 next = i
         self.part_sol.append(next)
 
+    def eva_tour(self, tour):
+        d = 0
+        for i in range(len(tour)):
+            j = tour[i]
+            k = tour[(i+1)%len(tour)]
+            d += math.sqrt((self.data_x[j] - 
+                            self.data_x[k])**2 + 
+                        (self.data_y[j] - 
+                            self.data_y[k])**2)
+        return d
+
     def neighbour(self):
         while len(self.part_sol) < len(self._data.x):
             self.nearest()
@@ -59,9 +73,6 @@ class TSPSolver(object):
         y = self._data.y[cities].reshape(len(cities), 1)
         d = np.sqrt((x - x.T)**2 + (y - y.T)**2)
         return d/d.max()
-
-    def arr2seq(self, arr):
-        return np.argmax(arr, axis=1)
 
     def sliding(self):
         Flag = True
@@ -126,7 +137,10 @@ class TSPSolver(object):
             ins_ind = np.argmin(self.cost_ins(d,tour,np.roll(tour, -1), a))
             tour.insert(ins_ind + 1, a)
         new_tour = np.array(tbd)[np.array(tour[1:-1])-1].tolist()
-        self.part_sol[line[0] : line[-1] + 1] = new_tour
+        tmp = deepcopy(self.part_sol)
+        tmp[line[0] : line[-1] + 1] = new_tour
+        if self.eva_tour(tmp) < self.eva_tour(self.part_sol):
+            self.part_sol = tmp
         return [init] + new_tour + [end]
 
     def ins_2(self):
@@ -162,7 +176,7 @@ class TSPSolver(object):
         for i in range(len(line_1)+len(line_2)):
             feas = (mask==0)
             feas_ind = np.flatnonzero(mask == 0)
-            a = feas_ind[d[np.ix_(feas, ~feas)].min(1).argmax()]
+            a = feas_ind[d[np.ix_(feas, ~feas)].min(1).argmin()]
             mask[a] = True
             ins_ind = np.argmin(self.cost_ins(d,tour,np.roll(tour, -1), a))
             tour.insert(ins_ind + 1, a)
@@ -170,22 +184,10 @@ class TSPSolver(object):
         cut = new_tour.index(next_1)
         tour_1 = new_tour[1 : cut]
         tour_2 = new_tour[cut+2 : -1]
-        self.part_sol = fixed_1 + tour_1 + fixed_2 + tour_2 + fixed_3
+        if self.eva_tour(fixed_1 + tour_1 + fixed_2 + tour_2 + fixed_3) < self.eva_tour(self.part_sol):
+            self.part_sol = fixed_1 + tour_1 + fixed_2 + tour_2 + fixed_3
         return [prev_1] + tour_1 + [next_1], [prev_2] + tour_2 + [next_2]
-
-    def anneal(self, cities):
-        n_step = 10001
-        spins = np.zeros((len(cities)**2, n_step))
-        spins[:, 0] = 2*np.eye(len(cities)).reshape((len(cities)**2, 1))-1
-        d = self.CalD(cities)
-        J = self.CalJ(cities, d) - 5*np.eye(len(cities)**2)
-
-
-    def main(self, pos, size_w):
-        Flag = True
-        while Flag:
-            Flag = self.sliding()
-
+        #return fixed_1 + tour_1 + fixed_2 + tour_2 + fixed_3
 
     def concorde(self, time_bound=-1, verbose=False, random_seed=0):
         name = str(uuid.uuid4().hex)[0:9]
